@@ -113,6 +113,19 @@ io.on('connection', (socket) => {
   });
 });
 
+// ===== API =====
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK' });
+});
+
+// ===== Serve Angular =====
+const clientPath = path.join(__dirname, '../dist');
+app.use(express.static(clientPath));
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientPath, 'index.html'));
+});
+
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`--------------------------------------------------`);

@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "ng serve",
-    "build": "ng build",
+    "build": "ng build --configuration production",
+    "start": "node backend/server.js",
     "preview": "ng serve --configuration=production"
   },
   "dependencies": {
