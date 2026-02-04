@@ -1,20 +1,42 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# CARD-GAME – Tool Siêu Cúp Billiards 🎱
 
-# Run and deploy your AI Studio app
+## 📌 Tổng quan
+**CARD-GAME** là một công cụ phục vụ cho **Siêu Cúp Billiards**, bao gồm:
+- **Backend**: xử lý logic, API
+- **Client**: giao diện người dùng
 
-This contains everything you need to run your app locally.
+Dự án được tách riêng backend và client để dễ phát triển, bảo trì và mở rộng.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Q8bZS8wvkDXpW50zl_QlAMn15L1QTQ26
+---
 
-## Run Locally
+## 📁 Cấu trúc dự án
 
-**Prerequisites:**  Node.js
+CARD-GAME
+│
+├── backend/ # Backend Node.js
+│ └── server.js
+│
+├── src/ # Source code client
+├── .angular/
+├── node_modules/
+│
+├── index.html
+├── index.tsx
+├── angular.json
+├── tsconfig.json
+├── metadata.json
+│
+├── .env.local
+├── .gitignore
+├── package.json
+├── package-lock.json
+└── README.md
 
+## Chạy Backend
+cd backend
+npm install
+node server.js
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   ``
+## Chạy Frotend
+npm install
+npm run dev
