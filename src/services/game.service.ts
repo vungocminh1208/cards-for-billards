@@ -58,7 +58,7 @@ export class GameService {
   constructor() {
     // 1. Init Socket
     const hostname = window.location.hostname;
-    const SERVER_URL = `http://${hostname}:3000`;
+    const SERVER_URL = window.location.origin.includes('localhost') ? `http://${hostname}:3000` : window.location.origin;
     
     console.log('INIT SERVICE: Connecting to', SERVER_URL);
     
