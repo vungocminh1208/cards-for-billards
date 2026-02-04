@@ -1,0 +1,5 @@
+{
+  "name": "Game Bài Tây (Card Game)",
+  "description": "Ứng dụng quản lý trò chơi bài tây: chia bài tính thứ tự, chia bài chơi (2 lá), và tính điểm người thắng.",
+  "requestFramePermissions": []
+}

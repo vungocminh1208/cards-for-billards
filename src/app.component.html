@@ -1,0 +1,97 @@
+
+<div class="min-h-screen bg-gray-900 text-white p-2 md:p-4 flex flex-col">
+  <!-- Header Compact -->
+  <header class="mb-4 flex items-start justify-between pt-2 px-2 h-16">
+    <div class="flex items-center gap-2 pt-1">
+      <div class="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center shadow-lg">
+        <span class="text-lg">♠️</span>
+      </div>
+      <h1 class="text-xl md:text-2xl font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent hidden sm:block">
+        Bi-a Siêu Cúp
+      </h1>
+      <h1 class="text-lg font-bold bg-gradient-to-r from-green-400 to-blue-500 bg-clip-text text-transparent sm:hidden">
+        Thần Tài Chia Bài
+      </h1>
+    </div>
+
+    <!-- Right Side Buttons -->
+    @if (gameService.myName()) {
+      <div class="flex flex-col items-end gap-1.5 z-30">
+        <!-- Exit Button -->
+        <button 
+          (click)="gameService.leaveGame()"
+          class="bg-red-900/40 hover:bg-red-800 text-red-200 text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded border border-red-800/50 transition-colors w-28 text-center"
+        >
+          Thoát / Đổi tên
+        </button>
+
+        <div class="flex gap-1">
+            <!-- Turn Order Button -->
+            <button 
+              (click)="toggleTurnOrder()"
+              class="bg-purple-900/40 hover:bg-purple-800 text-purple-200 text-[10px] uppercase font-bold tracking-wider px-2 py-1.5 rounded border border-purple-800/50 transition-colors w-14 sm:w-auto text-center flex items-center justify-center gap-1"
+              title="Xem thứ tự đánh"
+            >
+              <span>🔢</span> <span class="hidden sm:inline">Thứ tự</span>
+            </button>
+
+            <!-- Leaderboard Button -->
+            <button 
+              (click)="toggleLeaderboard()"
+              class="bg-blue-900/40 hover:bg-blue-800 text-blue-200 text-[10px] uppercase font-bold tracking-wider px-2 py-1.5 rounded border border-blue-800/50 transition-colors w-14 sm:w-auto text-center flex items-center justify-center gap-1"
+              title="Xem bảng xếp hạng"
+            >
+              <span>🏆</span> <span class="hidden sm:inline">BXH</span>
+            </button>
+        </div>
+      </div>
+    }
+  </header>
+
+  <!-- Content Area -->
+  <main class="flex-grow flex flex-col w-full max-w-md md:max-w-7xl mx-auto relative z-0">
+    <!-- Logic Fix: Nếu chưa nhập tên (chưa join) thì LUÔN hiển thị màn hình Setup -->
+    @if (!gameService.myName()) {
+        <app-setup-view class="w-full flex-grow flex items-center justify-center" />
+    } @else {
+        <!-- Đã có tên thì mới hiển thị theo trạng thái game -->
+        @switch (gameService.phase()) {
+          @case ('setup') {
+             <div class="flex items-center justify-center h-full">
+                <div class="text-center animate-pulse">Đang kết nối vào phòng...</div>
+             </div>
+          }
+          @case ('lobby') {
+            <app-lobby-view class="w-full flex-grow" />
+          }
+          @case ('order') {
+            <app-order-view class="w-full flex-grow" />
+          }
+          @case ('playing') {
+            <app-game-view class="w-full flex-grow h-full" />
+          }
+        }
+    }
+  </main>
+
+  <!-- Leaderboard Modal -->
+  @if (showLeaderboard()) {
+    <app-leaderboard-modal 
+      [players]="gameService.players()"
+      (close)="showLeaderboard.set(false)"
+    />
+  }
+
+  <!-- Turn Order Modal -->
+  @if (showTurnOrder()) {
+    <app-turn-order-modal 
+      [players]="gameService.players()"
+      (close)="showTurnOrder.set(false)"
+    />
+  }
+
+  <!-- Footer -->
+  <footer class="mt-6 text-center text-gray-600 text-xs pb-4">
+    <p>Mobile Optimized • Angular v20+ • Socket.io</p>
+  </footer>
+</div>
