@@ -15,11 +15,16 @@ import { PlayingCardComponent } from './playing-card.component';
       <div class="flex-grow overflow-y-auto custom-scroll p-2 pb-60"> <!-- Increased bottom padding to avoid overlap with fixed footer -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           @for (player of otherPlayers(); track player.id) {
-            <div class="bg-gray-800/60 rounded-lg p-2 border border-gray-700/50 relative flex flex-col min-h-[110px]">
+            <div class="bg-gray-800/60 rounded-lg p-2 border border-gray-700/50 relative flex flex-col min-h-[110px]" [class.opacity-50]="player.connected === false">
               <!-- Player Header -->
               <div class="flex justify-between items-start mb-1 h-7">
                  <div class="flex flex-col overflow-hidden mr-1">
-                    <span class="font-bold text-xs text-gray-200 truncate">{{ player.name }}</span>
+                    <span class="font-bold text-xs text-gray-200 truncate flex items-center gap-1">
+                        {{ player.name }}
+                        @if (player.connected === false) {
+                           <span class="w-2 h-2 rounded-full bg-red-500" title="Offline"></span>
+                        }
+                    </span>
                     <span class="text-[10px] text-yellow-500 font-mono leading-none">{{ player.score }} pts</span>
                  </div>
                  

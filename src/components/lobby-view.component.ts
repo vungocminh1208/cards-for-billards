@@ -24,7 +24,7 @@ import { GameService } from '../services/game.service';
              <div class="flex flex-col sm:flex-row sm:items-center justify-between bg-gray-700 p-3 rounded-lg border border-gray-600 animate-pulse-once gap-3">
                 
                 <!-- Player Info -->
-                <div class="flex items-center gap-3 flex-grow">
+                <div class="flex items-center gap-3 flex-grow" [class.opacity-50]="player.connected === false">
                   <div class="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0"
                      [class.bg-yellow-500]="player.isHost"
                      [class.text-black]="player.isHost"
@@ -35,6 +35,9 @@ import { GameService } from '../services/game.service';
                   <div class="text-left overflow-hidden">
                     <div class="font-bold text-white flex items-center gap-2 text-sm truncate">
                       {{ player.name }}
+                      @if (player.connected === false) {
+                        <span class="text-[10px] bg-red-900 text-red-300 px-1.5 py-0.5 rounded">OFFLINE</span>
+                      }
                       @if (player.id === gameService.myId()) {
                         <span class="text-[10px] bg-green-900 text-green-300 px-1.5 py-0.5 rounded">BẠN</span>
                       }

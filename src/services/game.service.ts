@@ -21,6 +21,8 @@ export interface Player {
   orderCard?: Card;
   initialOrderCard?: Card; // New: Persist the card used for ordering
   isHost: boolean;
+  connected?: boolean;
+  socketId?: string;
 }
 
 export type GamePhase = 'setup' | 'lobby' | 'order' | 'playing';
@@ -38,6 +40,7 @@ export interface GameState {
 })
 export class GameService {
   // --- Local State ---
+  deviceId = signal<string>('');
   myId = signal<string>(''); 
   myName = signal<string>('');
   
@@ -58,7 +61,7 @@ export class GameService {
   constructor() {
     // 1. Init Socket
     const hostname = window.location.hostname;
-    const SERVER_URL = window.location.origin.includes('localhost') ? `http://${hostname}:3000` : window.location.origin;
+    const SERVER_URL = `http://${hostname}:3000`;
     
     console.log('INIT SERVICE: Connecting to', SERVER_URL);
     
@@ -68,8 +71,18 @@ export class GameService {
       reconnectionDelay: 1000
     });
 
-    // 2. Check SessionStorage
-    const savedName = sessionStorage.getItem('PLAYER_NAME');
+    // 2. Init Device ID (Persistent ID)
+    let storedDeviceId = localStorage.getItem('DEVICE_ID');
+    if (!storedDeviceId) {
+        // Simple UUID fallback
+        storedDeviceId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        localStorage.setItem('DEVICE_ID', storedDeviceId);
+    }
+    this.deviceId.set(storedDeviceId);
+    this.myId.set(storedDeviceId);
+
+    // 3. Check LocalStorage for Name
+    const savedName = localStorage.getItem('PLAYER_NAME');
     if (savedName) {
         this.myName.set(savedName);
     }
@@ -78,14 +91,12 @@ export class GameService {
 
     this.socket.on('connect', () => {
       console.log('✅ SOCKET CONNECTED. ID:', this.socket.id);
-      if (this.socket.id) {
-        this.myId.set(this.socket.id);
-        
-        // Auto-rejoin if we have a name
-        if (this.myName()) {
-            console.log('🔄 Auto-rejoining as', this.myName());
-            this.socket.emit('JOIN_GAME', this.myName());
-        }
+      // Do NOT overwrite myId with socket.id anymore.
+      
+      // Auto-rejoin if we have a name
+      if (this.myName()) {
+          console.log('🔄 Auto-rejoining as', this.myName());
+          this.joinGame(this.myName());
       }
     });
 
@@ -99,10 +110,10 @@ export class GameService {
       
       // Auto-fix: If I have a name, but Server says I'm not in the list (and it's Lobby), try to join again.
       if (this.myName() && state.phase === 'lobby') {
-          const amIInList = state.players.some(p => p.id === this.myId() || p.name === this.myName());
+          const amIInList = state.players.some(p => p.id === this.myId());
           if (!amIInList && this.socket.connected) {
              console.log('⚠️ Detect Ghost State (Name set but not in list). Re-joining...');
-             this.socket.emit('JOIN_GAME', this.myName());
+             this.joinGame(this.myName());
           }
       }
     });
@@ -114,17 +125,18 @@ export class GameService {
 
   joinGame(name: string) {
     console.log('👉 ACTION: Join Game as:', name);
-    sessionStorage.setItem('PLAYER_NAME', name);
+    localStorage.setItem('PLAYER_NAME', name);
     this.myName.set(name);
     if (this.socket.connected) {
-      this.socket.emit('JOIN_GAME', name);
+      this.socket.emit('JOIN_GAME', { name, deviceId: this.deviceId() });
     } else {
       console.warn('Socket not connected yet, waiting...');
     }
   }
 
   leaveGame() {
-    sessionStorage.removeItem('PLAYER_NAME');
+    this.socket.emit('LEAVE_GAME');
+    localStorage.removeItem('PLAYER_NAME');
     this.myName.set('');
     // Reload trang để xóa sạch socket state
     window.location.reload();
@@ -278,7 +290,7 @@ export class GameService {
   }
 
   clearGameData() {
-    sessionStorage.removeItem('PLAYER_NAME');
+    localStorage.removeItem('PLAYER_NAME');
     this.socket.emit('RESET_GAME');
   }
 
@@ -291,7 +303,7 @@ export class GameService {
   }
 
   private resetLocalState() {
-    sessionStorage.removeItem('PLAYER_NAME');
+    localStorage.removeItem('PLAYER_NAME');
     this.myName.set('');
     this.phase.set('setup');
     this.players.set([]);
